@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "jsx": "react-native",
+    "lib": [
+      "es2017"
+    ],
+    "moduleResolution": "node",
+    "noEmit": true,
+    "strict": true,
+    "target": "esnext",
+    "paths": {
+      "@requestum/general": [
+        "./src/General"
+      ],
+      "@requestum/navigation": [
+        "./src/Navigation"
+      ],
+      "@requestum/screens": [
+        "./src/Screens"
+      ],
+      "@requestum/states": [
+        "./src/General/States"
+      ]
+    },
+    "types": [
+      "react-native",
+      "node"
+    ]
+  },
+  "extends": "expo/tsconfig.base"
+}
