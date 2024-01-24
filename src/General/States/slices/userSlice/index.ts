@@ -1,6 +1,7 @@
 import {Actions, Selectors, State} from './types';
 
 import {createSlice} from '@reduxjs/toolkit';
+import {removeUser, saveUser} from '@requestum/general';
 
 const initialState: State = {};
 
@@ -10,9 +11,11 @@ const userSlice = createSlice<State, Actions, 'userSlice'>({
 	reducers: {
 		login(state, action) {
 			state.user = action.payload;
+			saveUser(action.payload);
 		},
 		logout(state) {
 			state.user = undefined;
+			removeUser();
 		},
 	},
 });
