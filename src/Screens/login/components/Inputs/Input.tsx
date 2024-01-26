@@ -136,6 +136,7 @@ export const Input = React.forwardRef<IInput, Props>((props, ref) => {
 					{...props}
 					cursorColor={Theme.colors.mahenta}
 					ref={props.inputRef}
+					secureTextEntry={isPassword}
 					style={styles.input}
 					onBlur={onBlur}
 					onFocus={onFocus}
