@@ -1,10 +1,11 @@
 import React from 'react';
-import {TextInput, View} from 'react-native';
+import {TextInput} from 'react-native';
 
 import Email from './res/email.svg';
 import Password from './res/password.svg';
 import {IInput, Input} from './Input';
-import {styles} from './styles';
+
+import styled from 'styled-components/native';
 
 type Props = {
 	email: string;
@@ -17,9 +18,13 @@ type Props = {
 	passwordInputRef: React.RefObject<TextInput>
 }
 
+const View = styled.View`
+	gap: 16px;
+`;
+
 export const Inputs: React.FC<Props> = (props) => {
 	return (
-		<View style={styles.root}>
+		<View>
 			<Input
 				blurOnSubmit={false}
 				leftImage={Email}

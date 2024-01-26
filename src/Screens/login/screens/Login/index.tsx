@@ -1,16 +1,16 @@
 import React from 'react';
-import {Text, TextInput, View} from 'react-native';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import Animated, {FadeIn, FadeOut, Layout} from 'react-native-reanimated';
+import {TextInput} from 'react-native';
+import {KeyboardAwareScrollView as KeyboardAwareScrollViewImpl} from 'react-native-keyboard-aware-scroll-view';
 
 import {IInput, Inputs, Link} from '../../components';
 
 import UserImage from './res/user.svg';
 import {styles} from './styles';
 
-import {BackButton, Button, Theme} from '@requestum/general';
+import {BackButton, Button, safeLayoutAnimation} from '@requestum/general';
 import {LoginScreenProps} from '@requestum/navigation';
 import {useAppDispatch, userState} from '@requestum/states';
+import styled from 'styled-components/native';
 
 type Flow = 'login' | 'signup';
 
@@ -41,6 +41,58 @@ const screenOptions: Record<Flow, ScreenOptions> = {
 	}
 };
 
+const KeyboardAwareScrollView = styled(KeyboardAwareScrollViewImpl)`
+	flex: 1;
+`;
+
+const UserImageView = styled(UserImage)`
+	width: 60px;
+	height: 60px;
+	position: absolute;
+	right: 75px;
+	top: ${({theme}) => theme.windowHeight * 0.44}px;
+`;
+
+const HeaderView = styled.View`
+	margin-bottom: 8px;
+	gap: 8px;
+	align-items: center;
+`;
+
+const TextTitle = styled.Text`
+	font-family: ${({theme}) => theme.fonts.semiBold};
+	font-size: 18px;
+	color: ${({theme}) => theme.colors.white};
+`;
+
+const TextDescription = styled.Text`
+	font-family: ${({theme}) => theme.fonts.regular};
+	font-size: 11px;
+	color: ${({theme}) => theme.colors.lightGrey};
+`;
+
+const ControlsView = styled.View`
+	gap: 16px
+`;
+
+const LinkView = styled.View`
+	align-items: flex-end;
+`;
+
+const ToggleFlowView = styled.View`
+	justify-content: center;
+	align-items: center;
+	flex-direction: row;
+	gap: 8px;
+`;
+
+const TextToggleFlowTitle = styled.Text`
+	font-family: ${({theme}) => theme.fonts.regular};
+	font-size: 11px;
+	color: ${({theme}) => theme.colors.white};
+	text-shadow: ${({theme}) => theme.colors.mahenta} 1px 0 10px;
+`;
+
 export const LoginScreen: React.FC<LoginScreenProps> = ({route}) => {
 	const [flow, setFlow] = React.useState<Flow>(route.params.flow);
 	const [email, setEmail] = React.useState('');
@@ -50,9 +102,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({route}) => {
 	const passwordRef = React.useMemo(() => React.createRef<IInput>(), []);
 	const passwordInputRef = React.useMemo(() => React.createRef<TextInput>(), []);
 
-	const toggleFlow = React.useCallback(() => (
-		setFlow((prev) => prev === 'login' ? 'signup' : 'login')
-	), []);
+	const toggleFlow = React.useCallback(() => {
+		safeLayoutAnimation();
+		setFlow((prev) => prev === 'login' ? 'signup' : 'login');
+	}, []);
 
 	const checkInputs = React.useCallback((): boolean => {
 		let result = true;
@@ -83,21 +136,20 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({route}) => {
 			contentContainerStyle={styles.root}
 			keyboardShouldPersistTaps={'handled'}
 			showsVerticalScrollIndicator={false}
-			style={Theme.styles.flex1}
 		>
 			<BackButton />
-			<UserImage style={styles.userImage} />
+			<UserImageView />
 
-			<View style={styles.header}>
-				<Text style={styles.title}>
+			<HeaderView>
+				<TextTitle>
 					{screenOptions[flow].title}
-				</Text>
-				<Text style={styles.description}>
+				</TextTitle>
+				<TextDescription>
 					{screenOptions[flow].description}
-				</Text>
-			</View>
+				</TextDescription>
+			</HeaderView>
 
-			<View style={styles.controls}>
+			<ControlsView>
 				<Inputs
 					email={email}
 					emailRef={emailRef}
@@ -110,34 +162,28 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({route}) => {
 				/>
 
 				{screenOptions[flow].forgotText !== undefined ? (
-					<Animated.View
-						entering={FadeIn}
-						exiting={FadeOut}
-						style={styles.forgotText}
-					>
+					<LinkView>
 						<Link
 							title={screenOptions[flow].forgotText!}
 						/>
-					</Animated.View>
+					</LinkView>
 				) : null}
 
-				<Animated.View layout={Layout}>
-					<Button
-						title={screenOptions[flow].buttonText}
-						onPress={flow === 'login' ? onLoginPress : onSignupPress}
-					/>
-				</Animated.View>
-			</View>
+				<Button
+					title={screenOptions[flow].buttonText}
+					onPress={flow === 'login' ? onLoginPress : onSignupPress}
+				/>
+			</ControlsView>
 
-			<View style={styles.toggleFlow}>
-				<Text style={styles.toggleFlowTitle}>
+			<ToggleFlowView>
+				<TextToggleFlowTitle>
 					{screenOptions[flow].toggleFlowTitle}
-				</Text>
+				</TextToggleFlowTitle>
 				<Link
 					title={screenOptions[flow].toggleFlowAction}
 					onPress={toggleFlow}
 				/>
-			</View>
+			</ToggleFlowView>
 		</KeyboardAwareScrollView>
 	);
 };

@@ -1,11 +1,26 @@
 import React from 'react';
-import {View} from 'react-native';
 
 import Logo from './res/logo.svg';
-import {styles} from './styles';
 
 import {Button} from '@requestum/general';
 import {WelcomeScreenProps} from '@requestum/navigation';
+import styled from 'styled-components/native';
+
+const RootView = styled.View`
+	flex: 1;
+	justify-content: space-between;
+	padding: ${({theme}) => `
+		${theme.windowHeight * 0.26}px
+		35px
+		${theme.windowHeight * 0.09}px
+		35px
+	`};
+	align-items: center;
+`;
+const ButtonView = styled.View`
+	gap: 15px;
+	width: 100%;
+`;
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({navigation}) => {
 	
@@ -18,9 +33,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({navigation}) => {
 	), [navigation]);
 
 	return (
-		<View style={styles.root}>
+		<RootView>
 			<Logo />
-			<View style={styles.buttons}>
+			<ButtonView>
 				<Button
 					title='Login'
 					onPress={onLoginPress}
@@ -30,7 +45,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({navigation}) => {
 					title='Register'
 					onPress={onSignupPress}
 				/>
-			</View>
-		</View>
+			</ButtonView>
+		</RootView>
 	);
 };

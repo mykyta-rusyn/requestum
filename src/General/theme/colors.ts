@@ -1,4 +1,6 @@
-export const colors = {
+import {Colors} from 'styled-components/native';
+
+export const colors: Colors = {
 	mahenta: '#EB0057',
 	mahenta50: '#EB005750',
 	mahenta0: '#EB005700',

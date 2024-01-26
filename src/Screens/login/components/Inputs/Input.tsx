@@ -1,24 +1,12 @@
 import React from 'react';
-import {TextInput, TextInputProps, TouchableOpacity, View} from 'react-native';
-import Animated, {
-	cancelAnimation,
-	FadeIn,
-	FadeOut,
-	interpolate,
-	interpolateColor,
-	useAnimatedReaction,
-	useAnimatedStyle,
-	useSharedValue,
-	withRepeat,
-	withSequence,
-	withTiming
-} from 'react-native-reanimated';
+import {Animated, TextInput, TextInputProps, TouchableOpacity} from 'react-native';
 import {SvgProps} from 'react-native-svg';
 
 import PasswordShow from './res/password-show.svg';
-import {selectedTitle, styles} from './styles';
+import {styles} from './styles';
 
 import {Theme} from '@requestum/general';
+import styled from 'styled-components/native';
 
 export interface IInput {
 	errorAnimation: () => void
@@ -34,45 +22,53 @@ type Props = {
 
 const shakeOffset = 15;
 const shakeTime = 50;
-const AnimatedOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+
+const RootView = styled(Animated.View)`
+	width: 100%;
+	border-radius: 8px;
+	flex-direction: row;
+	align-items: stretch;
+	justify-content: center;
+	gap: 10px;
+	padding: 10px 16px 10px 16px;
+	border-width: 1px;
+	height: 50px;
+`;
+
+const ContentView = styled.View`
+	flex: 1;
+`;
+
+const Title = styled(Animated.Text)`
+	font-family: ${({theme}) => theme.fonts.regular};
+	position: absolute;
+`;
 
 export const Input = React.forwardRef<IInput, Props>((props, ref) => {
-	const focused = useSharedValue(0);
-	const translateX = useSharedValue(0);
+	const focused = React.useMemo(() => new Animated.Value(0), []);
+	const translateX = React.useMemo(() => new Animated.Value(0), []);
 	const [isPassword, setIsPassword] = React.useState(!!props.password);
 	const [isFocused, setIsFocused] = React.useState(false);
-
-	const rootStyle = useAnimatedStyle(() => ({
-		borderColor: interpolateColor(
-			focused.value,
-			[0, 1],
-			[Theme.colors.dark, Theme.colors.mahenta],
-		),
-		transform: [{translateX: translateX.value}]
-	}));
-
-	const titleStyle = useAnimatedStyle(() => {
-		if (props.value!.length > 0) {
-			return selectedTitle;
-		}
-
-		return {
-			color: interpolateColor(
-				focused.value,
-				[0, 1],
-				[Theme.colors.lightGrey, Theme.colors.white],
-			),
-			fontSize: interpolate(
-				focused.value,
-				[0, 1],
-				[12, 10]
-			),
-			top: interpolate(
-				focused.value,
-				[0, 1],
-				[7.5, 0]
-			)
-		};
+	const borderColor = focused.interpolate({
+		inputRange: [0, 1],
+		outputRange: [Theme.colors.dark, Theme.colors.mahenta],
+		extrapolate: 'clamp'
+	});
+	const transform = [{translateX}];
+	const color = focused.interpolate({
+		inputRange: [0, 1],
+		outputRange: [Theme.colors.lightGrey, Theme.colors.white],
+		extrapolate: 'clamp'
+	});
+	const fontSize = focused.interpolate({
+		inputRange: [0, 1],
+		outputRange: [12, 10],
+		extrapolate: 'clamp'
+	});
+	const top = focused.interpolate({
+		inputRange: [0, 1],
+		outputRange: [7.5, 0],
+		extrapolate: 'clamp'
 	});
 
 	const onFocus = React.useCallback(() => {
@@ -91,71 +87,90 @@ export const Input = React.forwardRef<IInput, Props>((props, ref) => {
 		setIsPassword((prev) => !prev)
 	), []);
 
-	useAnimatedReaction(
-		() => Number(isFocused),
-		(isFocused) => {
-			focused.value = withTiming(isFocused);
-		}
-	);
-	
+	React.useEffect(() => {
+		Animated.timing(focused, {
+			toValue: Number(isFocused),
+			useNativeDriver: false,
+			duration: 300
+		}).start();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isFocused]);
+
 	React.useImperativeHandle(ref, () => ({
 		errorAnimation() {
-			cancelAnimation(translateX);
+			translateX.stopAnimation();
 			props.onChangeText?.('');
 			setIsFocused(false);
-			translateX.value = withSequence(
-				withTiming(-shakeOffset, {duration: shakeTime / 2}),
-				withRepeat(withTiming(shakeOffset, {duration: shakeTime}), 5, true),
-				withTiming(0, {duration: shakeTime / 2})
-			);
+			Animated.sequence([
+				Animated.timing(
+					translateX,
+					{
+						toValue: -shakeOffset,
+						duration: shakeTime / 2,
+						useNativeDriver: false
+					}
+				),
+				Animated.loop(Animated.timing(
+					translateX,
+					{
+						toValue: shakeOffset,
+						duration: shakeTime,
+						useNativeDriver: false
+					}
+				), {iterations: 5}
+				),
+				Animated.timing(
+					translateX,
+					{
+						toValue: 0,
+						duration: shakeTime / 2,
+						useNativeDriver: false
+					}
+				)
+			]).start();
 
 		},
 	}));
 
 	return (
-		<Animated.View
-			style={[styles.inputRoot, rootStyle]}
-		>
-			<Animated.View
-				entering={FadeIn}
-				exiting={FadeOut}
+		<RootView style={{borderColor, transform}}>
+			<props.leftImage
+				fill={isFocused ? Theme.colors.mahenta : Theme.colors.lightGrey}
+				height={24}
 				key={`input_left_${isFocused}`}
-			>
-				<props.leftImage
-					fill={isFocused ? Theme.colors.mahenta : Theme.colors.lightGrey}
-					style={styles.icon}
-				/>
-			</Animated.View>
+				width={24}
+			/>
 
-			<View style={Theme.styles.flex1}>
-				<Animated.Text style={[styles.title, titleStyle]}>
+			<ContentView>
+				<Title style={{color, fontSize, top}}>
 					{props.title}
-				</Animated.Text>
+				</Title>
 
+				{/* we can`t use styled-components here, cause we need ref for TextInput */}
 				<TextInput
 					{...props}
 					cursorColor={Theme.colors.mahenta}
 					ref={props.inputRef}
+					secureTextEntry={isPassword}
 					style={styles.input}
 					onBlur={onBlur}
 					onFocus={onFocus}
 				/>
-			</View>
+			</ContentView>
 
 			{props.password !== undefined ? (
-				<AnimatedOpacity
+				<TouchableOpacity
 					activeOpacity={0.7}
-					entering={FadeIn}
-					exiting={FadeOut}
 					key={`input_password_${isPassword}`}
 					onPress={togglePassword}
 				>
 					<PasswordShow
 						fill={isPassword ? Theme.colors.mahenta : Theme.colors.lightGrey}
-						style={styles.icon}
+						height={24}
+						width={24}
 					/>
-				</AnimatedOpacity>
+				</TouchableOpacity>
 			) : null}
-		</Animated.View>
+		</RootView>
 	);
 });

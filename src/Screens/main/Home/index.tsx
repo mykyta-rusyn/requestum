@@ -1,12 +1,47 @@
 import React from 'react';
-import {Text, View} from 'react-native';
 
 import R from './res/R.svg';
-import {styles} from './styles';
 
 import {Button} from '@requestum/general';
 import {HomeScreenProps} from '@requestum/navigation';
 import {useAppDispatch, useAppSelector, userState} from '@requestum/states';
+import styled from 'styled-components/native';
+
+const RootView = styled.View`
+	flex: 1;
+	padding: 100% 35px 26% 35px;
+	gap: 54px;
+`;
+
+const RView = styled(R)`
+	position: absolute;
+	top: 54px;
+	right: 54px;
+`;
+
+const TitleContainerView = styled.View`
+	gap: 8px;
+	align-items: center;
+`;
+
+const TextTitle = styled.Text`
+	font-family: ${({theme}) => theme.fonts.regular};
+	font-size: 11px;
+	color: ${({theme}) => theme.colors.lightGrey};
+`;
+
+const TextUserName = styled.Text`
+	font-family: ${({theme}) => theme.fonts.semiBold};
+	font-size: 18px;
+	color: ${({theme}) => theme.colors.white};
+`;
+
+const TextAppContent = styled.Text`
+	font-family: ${({theme}) => theme.fonts.medium};
+	font-size: 16px;
+	color: ${({theme}) => theme.colors.white};
+	text-align: center;
+`;
 
 export const HomeScreen: React.FC<HomeScreenProps> = () => {
 	const {email} = useAppSelector(userState.selectors.user)!;
@@ -17,25 +52,25 @@ export const HomeScreen: React.FC<HomeScreenProps> = () => {
 	}, [dispatch]);
 
 	return (
-		<View style={styles.root}>
-			<R style={styles.R} />
-			<View style={styles.titleContainer}>
-				<Text style={styles.title}>
+		<RootView>
+			<RView />
+			<TitleContainerView>
+				<TextTitle>
 					You’re loggen in now 
-				</Text>
-				<Text style={styles.userName}>
+				</TextTitle>
+				<TextUserName>
 					{email}
-				</Text>
-			</View>
+				</TextUserName>
+			</TitleContainerView>
 
-			<Text style={styles.appContent}>
+			<TextAppContent>
 				Now you can see the app content!
-			</Text>
+			</TextAppContent>
 
 			<Button
 				title='Log out'
 				onPress={onLogout}
 			/>
-		</View>
+		</RootView>
 	);
 };

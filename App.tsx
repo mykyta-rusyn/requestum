@@ -1,13 +1,19 @@
 import React from 'react';
-import {ImageBackground, StatusBar, StyleSheet} from 'react-native';
+import {StatusBar} from 'react-native';
 import {Provider} from 'react-redux';
 
 import {loadUser, nullReturning, Theme} from '@requestum/general';
 import {Navigator} from '@requestum/navigation';
 import {store, useAppDispatch, useAppSelector, userState} from '@requestum/states';
 import {hideAsync, preventAutoHideAsync} from 'expo-splash-screen';
+import {ThemeProvider} from 'styled-components';
+import styled from 'styled-components/native';
 
 preventAutoHideAsync().catch(nullReturning);
+
+const Background = styled.ImageBackground`
+	flex: 1;
+`;
 
 function AppInit(): React.ReactNode {
 	const [isLoaded, setIsLoaded] = React.useState(false);
@@ -32,18 +38,19 @@ function AppInit(): React.ReactNode {
 
 export default function App(): React.ReactNode {
 	return (
-		<ImageBackground
+		<Background
 			source={require('./assets/splash.png')}
-			style={StyleSheet.absoluteFill}
 		>
 			<StatusBar
 				translucent
 				backgroundColor={'transparent'}
 				barStyle={'light-content'}
 			/>
-			<Provider store={store}>
-				<AppInit />
-			</Provider>
-		</ImageBackground>
+			<ThemeProvider theme={Theme.theme}>
+				<Provider store={store}>
+					<AppInit />
+				</Provider>
+			</ThemeProvider>
+		</Background>
 	);
 }
