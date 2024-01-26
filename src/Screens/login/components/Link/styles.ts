@@ -8,5 +8,6 @@ export const styles = StyleSheet.create({
 		color: Theme.colors.mahenta,
 		textShadowColor: Theme.colors.mahenta,
 		textShadowRadius: 5,
+		fontSize: 11
 	}
 });
